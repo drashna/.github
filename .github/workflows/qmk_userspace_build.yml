@@ -30,7 +30,7 @@ jobs:
 
     steps:
     - name: Checkout Userspace
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
 
@@ -41,12 +41,12 @@ jobs:
         files: qmk_firmware
 
     - name: Checkout QMK Firmware
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       if: steps.check_files.outputs.files_exists == 'false'
       with:
         path: qmk_firmware
-        repository: ${{ inputs.qmk_repo || 'qmk/qmk_firmware' }}
-        ref: ${{ inputs.qmk_ref || 'master' }}
+        repository: ${{ inputs.qmk_repo }}
+        ref: ${{ inputs.qmk_ref }}
         submodules: recursive
         fetch-depth: 1000 # This line should be removed once userspace support exists in QMK Firmware
 
@@ -64,8 +64,7 @@ jobs:
 
     - name: Build
       run: |
-        rm -rfdv qmk_firmware/**/${{ inputs.keymap_name || github.actor }}/*
-        qmk mass-compile -e DUMP_CI_METADATA=yes -km ${{ inputs.keymap_name || github.actor }} || touch .failed
+        qmk mass-compile -e DUMP_CI_METADATA=yes -km ${{ inputs.keymap_name }} || touch .failed
         # Generate the step summary markdown
         ./qmk_firmware/util/ci/generate_failure_markdown.sh > $GITHUB_STEP_SUMMARY || true
         # Truncate to a maximum of 1MB to deal with GitHub workflow limit
@@ -78,7 +77,7 @@ jobs:
       if: always() && !cancelled()
       continue-on-error: true
       with:
-        name: Firmware-${{ inputs.keymap_name || github.actor }}
+        name: Firmware-${{ inputs.keymap_name }}
         path: |
           *.bin
           *.hex
