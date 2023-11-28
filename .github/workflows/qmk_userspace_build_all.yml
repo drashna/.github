@@ -13,13 +13,18 @@ on:
         default: 'master'
         required: false
         type: string
+      keymap_name:
+        description: 'keymap name to build with'
+        default: ${{ github.actor }}
+        required: false
+        type: string
 
 permissions:
   contents: write
 
 jobs:
   build:
-    name: Build Firmware
+    name: Build ${{ inputs.keymap_name }} Firmware
     runs-on: ubuntu-latest
     container: qmkfm/base_container
 
@@ -52,13 +57,13 @@ jobs:
 
     - name: Configure QMK CLI
       run: |
-        qmk config userspace_compile.parallel=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null)
+        qmk config mass_compile.parallel=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null)
         qmk config user.qmk_home=$GITHUB_WORKSPACE/qmk_firmware
         qmk config user.overlay_dir=$GITHUB_WORKSPACE
 
     - name: Build
       run: |
-        qmk userspace-compile -e DUMP_CI_METADATA=yes || touch .failed
+        qmk mass-compile -e DUMP_CI_METADATA=yes -km ${{ inputs.keymap_name }} || touch .failed
         # Generate the step summary markdown
         ./qmk_firmware/util/ci/generate_failure_markdown.sh > $GITHUB_STEP_SUMMARY || true
         # Truncate to a maximum of 1MB to deal with GitHub workflow limit
@@ -71,7 +76,7 @@ jobs:
       if: always() && !cancelled()
       continue-on-error: true
       with:
-        name: Firmware
+        name: Firmware-${{ inputs.keymap_name }}
         path: |
           *.bin
           *.hex
