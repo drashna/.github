@@ -5,7 +5,7 @@ on:
     inputs:
       qmk_ref:
         description: 'qmk_firmware branch to build against'
-        default: 'master'
+        default: ${{ github.ref_name }}
         required: false
         type: string
 
@@ -24,7 +24,7 @@ jobs:
         if: always() && !cancelled()
         with:
           github_token: ${{ github.token }}
-          tag_name: latest_${{ github.ref_name }}
+          tag_name: latest_${{ inputs.qmk_ref }}
           delete_release: true
           repo: drashna/qmk_userspace
 
@@ -37,8 +37,9 @@ jobs:
         if: always() && !cancelled()
         with:
           token: ${{ github.token }}
-          name: Latest QMK Firmware on '${{ github.ref_name }}' branch
-          tag_name: latest_${{ github.ref_name }}
+          name: Latest QMK Firmware on '${{ inputs.qmk_ref }}' branch
+          tag_name: latest_${{ inputs.qmk_ref }}
+          target_commitish: ${{ inputs.qmk_ref }}
           fail_on_unmatched_files: false
           draft: false
           prerelease: false
