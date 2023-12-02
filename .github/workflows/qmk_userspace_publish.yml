@@ -24,7 +24,7 @@ jobs:
         uses: actions/download-artifact@v3
 
       - name: Prune Previous Releases
-        uses: dev-drprasad/delete-older-releases@v1.0.1
+        uses: dev-drprasad/delete-tag-and-release@v1.0.1
         if: always() && !cancelled()
         with:
           github_token: ${{ github.token }}
