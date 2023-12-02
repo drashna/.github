@@ -19,18 +19,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download binaries
-        if: always() && !cancelled()
-        uses: actions/download-artifact@v3
-
       - name: Prune Previous Releases
         uses: dev-drprasad/delete-tag-and-release@v1.0.1
         if: always() && !cancelled()
         with:
           github_token: ${{ github.token }}
           tag_name: latest_${{ github.ref_name }}
-          delete_release: true #(optional) default: true
+          delete_release: true
           repo: drashna/qmk_userspace
+
+      - name: Download binaries
+        if: always() && !cancelled()
+        uses: actions/download-artifact@v3
 
       - name: Generate Release
         uses: softprops/action-gh-release@v1
